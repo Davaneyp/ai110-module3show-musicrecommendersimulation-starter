@@ -2,12 +2,24 @@ import csv
 from typing import List, Dict, Tuple, Optional
 from dataclasses import dataclass
 
-# Scoring weights from the Phase 2 Algorithm Recipe (max total = 6.0).
-GENRE_WEIGHT = 2.0
+# Phase 4 experiment toggle. False = baseline Algorithm Recipe weights.
+# True = "Weight Shift": energy doubled (1.5 -> 3.0), genre halved (2.0 -> 1.0).
+EXPERIMENT_WEIGHT_SHIFT = False
+
+if EXPERIMENT_WEIGHT_SHIFT:
+    GENRE_WEIGHT = 1.0
+    ENERGY_WEIGHT = 3.0
+else:
+    # Scoring weights from the Phase 2 Algorithm Recipe.
+    GENRE_WEIGHT = 2.0
+    ENERGY_WEIGHT = 1.5
 MOOD_WEIGHT = 1.0
-ENERGY_WEIGHT = 1.5
 ACOUSTIC_WEIGHT = 1.0
 VALENCE_WEIGHT = 0.5
+
+# Best possible score: every bonus earned and every closeness term perfect.
+# Baseline = 6.0, Weight Shift = 6.5.
+MAX_SCORE = GENRE_WEIGHT + MOOD_WEIGHT + ENERGY_WEIGHT + ACOUSTIC_WEIGHT + VALENCE_WEIGHT
 
 @dataclass
 class Song:
@@ -78,13 +90,14 @@ def load_songs(csv_path: str) -> List[Dict]:
     return songs
 
 def score_song(user_prefs: Dict, song: Dict) -> Tuple[float, List[str]]:
-    """Score one song against user preferences (max 6.0) and return (score, list of reasons)."""
-    # Algorithm Recipe (Phase 2), max score = 6.0:
-    #   +2.0  genre match
-    #   +1.0  mood match
-    #   +1.5  max, energy closeness:   1.5 * (1 - |song.energy - target_energy|)
-    #   +1.0  max, acoustic fit
-    #   +0.5  max, valence closeness:  0.5 * (1 - |song.valence - target_valence|)
+    """Score one song against user preferences (max MAX_SCORE) and return (score, list of reasons)."""
+    # Algorithm Recipe (Phase 2), max score = MAX_SCORE:
+    #   +GENRE_WEIGHT     genre match
+    #   +MOOD_WEIGHT      mood match
+    #   +ENERGY_WEIGHT    max, energy closeness:   ENERGY_WEIGHT * (1 - |song.energy - target_energy|)
+    #   +ACOUSTIC_WEIGHT  max, acoustic fit
+    #   +VALENCE_WEIGHT   max, valence closeness:  VALENCE_WEIGHT * (1 - |song.valence - target_valence|)
+    # Each closeness term stays in [0, weight] while targets are within 0-1.
     score = 0.0
     reasons: List[str] = []
 

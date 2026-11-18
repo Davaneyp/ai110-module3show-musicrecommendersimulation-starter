@@ -179,7 +179,15 @@ Profile: Chill Lofi
 
 ---
 
+## Stress Test: Diverse and Adversarial Profiles
+
+I ran the recommender on 3 standard profiles and 7 adversarial or edge-case profiles (conflicting preferences, unknown labels, messy input, out-of-range values, and an empty profile). The full terminal output and observations are in the [Model Card, Section 7: Evaluation](model_card.md#7-evaluation).
+
+---
+
 ## Experiments You Tried
+
+- **Weight Shift (energy ×2, genre ×½):** Toggle with `EXPERIMENT_WEIGHT_SHIFT` in `src/recommender.py`. It fixed some label-over-sound mistakes (Happy Pop, Sad but Hyped) but made genre nearly irrelevant. See the [Model Card, Section 7](model_card.md#7-evaluation) for the full comparison.
 
 Use this section to document the experiments you ran. For example:
 
