@@ -82,13 +82,98 @@ You can add more tests in `tests/test_recommender.py`.
 Paste a sample of your recommender's output here as a text block so a reader can see what it produces:
 
 ```
-# e.g.:
-# User profile: genre=indie, mood=chill, energy=low
-# Recommendations:
-#   1. ...
-#   2. ...
-#   3. ...
+Loading songs from data/songs.csv...
+Loaded songs: 20
+
+================================================================
+Profile: Happy Pop
+  genre=pop, mood=happy, energy=0.80, valence=0.80, acousticness=0.20
+================================================================
+1. Sunrise City by Neon Echo
+   Score: 5.93 / 6.00   [pop, happy]
+   Reasons:
+     - genre match: pop (+2.00)
+     - mood match: happy (+1.00)
+     - energy 0.82 vs target 0.80 (+1.47)
+     - acousticness 0.18 vs target 0.20 (+0.98)
+     - valence 0.84 vs target 0.80 (+0.48)
+
+2. Gym Hero by Max Pulse
+   Score: 4.64 / 6.00   [pop, intense]
+   Reasons:
+     - genre match: pop (+2.00)
+     - energy 0.93 vs target 0.80 (+1.30)
+     - acousticness 0.05 vs target 0.20 (+0.85)
+     - valence 0.77 vs target 0.80 (+0.48)
+
+3. Rooftop Lights by Indigo Parade
+   Score: 3.79 / 6.00   [indie pop, happy]
+   Reasons:
+     - mood match: happy (+1.00)
+     - energy 0.76 vs target 0.80 (+1.44)
+     - acousticness 0.35 vs target 0.20 (+0.85)
+     - valence 0.81 vs target 0.80 (+0.49)
+
+4. Fuego Lento by Sol Marea
+   Score: 2.83 / 6.00   [latin, playful]
+   Reasons:
+     - energy 0.81 vs target 0.80 (+1.48)
+     - acousticness 0.30 vs target 0.20 (+0.90)
+     - valence 0.90 vs target 0.80 (+0.45)
+
+5. Concrete Crown by Kilo Verse
+   Score: 2.80 / 6.00   [hip-hop, confident]
+   Reasons:
+     - energy 0.78 vs target 0.80 (+1.47)
+     - acousticness 0.12 vs target 0.20 (+0.92)
+     - valence 0.62 vs target 0.80 (+0.41)
+
+================================================================
+Profile: Chill Lofi
+  genre=lofi, mood=chill, energy=0.40, valence=0.60, acousticness=0.80
+================================================================
+1. Library Rain by Paper Lanterns
+   Score: 5.87 / 6.00   [lofi, chill]
+   Reasons:
+     - genre match: lofi (+2.00)
+     - mood match: chill (+1.00)
+     - energy 0.35 vs target 0.40 (+1.42)
+     - acousticness 0.86 vs target 0.80 (+0.94)
+     - valence 0.60 vs target 0.60 (+0.50)
+
+2. Midnight Coding by LoRoom
+   Score: 5.86 / 6.00   [lofi, chill]
+   Reasons:
+     - genre match: lofi (+2.00)
+     - mood match: chill (+1.00)
+     - energy 0.42 vs target 0.40 (+1.47)
+     - acousticness 0.71 vs target 0.80 (+0.91)
+     - valence 0.56 vs target 0.60 (+0.48)
+
+3. Focus Flow by LoRoom
+   Score: 4.98 / 6.00   [lofi, focused]
+   Reasons:
+     - genre match: lofi (+2.00)
+     - energy 0.40 vs target 0.40 (+1.50)
+     - acousticness 0.78 vs target 0.80 (+0.98)
+     - valence 0.59 vs target 0.60 (+0.49)
+
+4. Spacewalk Thoughts by Orbit Bloom
+   Score: 3.68 / 6.00   [ambient, chill]
+   Reasons:
+     - mood match: chill (+1.00)
+     - energy 0.28 vs target 0.40 (+1.32)
+     - acousticness 0.92 vs target 0.80 (+0.88)
+     - valence 0.65 vs target 0.60 (+0.47)
+
+5. Coffee Shop Stories by Slow Stereo
+   Score: 2.81 / 6.00   [jazz, relaxed]
+   Reasons:
+     - energy 0.37 vs target 0.40 (+1.46)
+     - acousticness 0.89 vs target 0.80 (+0.91)
+     - valence 0.71 vs target 0.60 (+0.45)
 ```
+
 
 **Screenshot or video** *(optional)*: <!-- Insert a screenshot or demo video link here -->
 
