@@ -2,16 +2,7 @@
 
 ## Project Summary
 
-In this project you will build and explain a small music recommender system.
-
-Your goal is to:
-
-- Represent songs and a user "taste profile" as data
-- Design a scoring rule that turns that data into recommendations
-- Evaluate what your system gets right and wrong
-- Reflect on how this mirrors real world AI recommenders
-
-Replace this paragraph with your own summary of what your version does.
+My version is **TuneJudge 1.0**, a content-based recommender that picks the top 5 songs from a 20-song catalog for a listener. The listener gives a favorite genre, a favorite mood, and target levels for energy, valence (how positive the music sounds), and acousticness. TuneJudge gives every song points for how well it matches, ranks the songs from highest to lowest, and lists the reasons behind each score. I tested it with 3 typical listeners and 7 tricky profiles, and I ran one experiment that changed the weights. Those tests showed where it works well and where it is biased: genre and mood labels can outweigh how a song actually sounds, and listeners whose favorite genre has only one song in the catalog get weaker recommendations. The full write-up is in the [Model Card](model_card.md).
 
 ---
 
@@ -52,18 +43,19 @@ This content-based recommender compares each song's attributes with the user's s
    python -m venv .venv
    source .venv/bin/activate      # Mac or Linux
    .venv\Scripts\activate         # Windows
+   ```
 
-2. Install dependencies
+2. Install dependencies:
 
-```bash
-pip install -r requirements.txt
-```
+   ```bash
+   pip install -r requirements.txt
+   ```
 
 3. Run the app:
 
-```bash
-python -m src.main
-```
+   ```bash
+   python -m src.main
+   ```
 
 ### Running Tests
 
@@ -79,7 +71,7 @@ You can add more tests in `tests/test_recommender.py`.
 
 ## Sample Recommendation Output
 
-Paste a sample of your recommender's output here as a text block so a reader can see what it produces:
+Here is the output for the first two profiles, Happy Pop and Chill Lofi, from `python -m src.main`. The other 8 profiles are in the [Model Card, Section 7](model_card.md#7-evaluation).
 
 ```
 Loading songs from data/songs.csv...
@@ -174,9 +166,6 @@ Profile: Chill Lofi
      - valence 0.71 vs target 0.60 (+0.45)
 ```
 
-
-**Screenshot or video** *(optional)*: <!-- Insert a screenshot or demo video link here -->
-
 ---
 
 ## Stress Test: Diverse and Adversarial Profiles
@@ -188,26 +177,22 @@ I ran the recommender on 3 standard profiles and 7 adversarial or edge-case prof
 ## Experiments You Tried
 
 - **Weight Shift (energy ×2, genre ×½):** Toggle with `EXPERIMENT_WEIGHT_SHIFT` in `src/recommender.py`. It fixed some label-over-sound mistakes (Happy Pop, Sad but Hyped) but made genre nearly irrelevant. See the [Model Card, Section 7](model_card.md#7-evaluation) for the full comparison.
-
-Use this section to document the experiments you ran. For example:
-
-- What happened when you changed the weight on genre from 2.0 to 0.5
-- What happened when you added tempo or valence to the score
-- How did your system behave for different types of users
+- **Adding valence to the score:** The starter profile had no valence. I added it (worth up to 0.5 points) so the recommender could tell apart songs with similar energy but a different feel, like a cheerful song versus a dark one. Because it is the smallest weight, it mostly breaks close ties and rarely changes which songs make the top 5.
+- **Different types of users:** I ran 3 typical listeners and 7 tricky profiles. Typical tastes got near-perfect #1 picks (5.87 to 5.94 out of 6). Tricky profiles exposed problems: a sad, high-energy listener got a quiet acoustic folk song at #1, and an empty profile still got a "top 5" made of the first five songs in the file.
 
 ---
 
 ## Limitations and Risks
 
-Summarize some limitations of your recommender.
+- **Tiny, made-up catalog.** There are only 20 songs, and their numbers were invented, not measured from real audio.
+- **Uneven genres.** Lofi has 3 songs and pop has 2, but the other 15 genres have 1 song each. A lofi fan gets a list full of lofi, while a classical or metal fan gets one real match and then leftovers.
+- **Labels can beat sound.** A genre and mood match is worth 3 of the 6 points. A listener who asked for loud, high-energy music got a quiet acoustic folk song at #1, only because it was tagged "folk" and "sad."
+- **Exact label matching only.** "indie pop" gets no credit for a pop fan, and "relaxed" gets none for a chill fan, even though they are close in meaning.
+- **No guardrails.** Unknown genres, impossible numbers like energy 1.5, and an empty profile all still return a confident-looking top 5 with no warning.
+- **The same songs keep showing up.** Gym Hero appeared in 7 of the 10 test lists, because it is close to any listener who wants energetic music.
+- **Missing information.** It does not use lyrics, language, artist, release year, or what the user has listened to before.
 
-Examples:
-
-- It only works on a tiny catalog
-- It does not understand lyrics or language
-- It might over favor one genre or mood
-
-You will go deeper on this in your model card.
+See [Model Card, Section 6](model_card.md#6-limitations-and-bias) for more detail.
 
 ---
 
@@ -217,10 +202,8 @@ Read and complete `model_card.md`:
 
 [**Model Card**](model_card.md)
 
-Write 1 to 2 paragraphs here about what you learned:
+Building TuneJudge showed me that a recommender doesn't "understand" music. It just turns preferences into numbers and adds them up. Every song gets points for matching the user's genre and mood, plus points for how close its energy, valence, and acousticness are to what the user asked for. Then the songs are sorted by score. That simple recipe worked well for clear, typical tastes like Happy Pop or Chill Lofi, where the #1 pick was almost perfect. But I learned that the weights decide everything. When I doubled energy and halved genre, some rankings got better and others got worse, and the classical fan lost their only classical song. There isn't one "correct" set of weights. Every choice favors some listeners over others.
 
-- about how recommenders turn data into predictions
-- about where bias or unfairness could show up in systems like this
-
+I also saw how bias can come from the data, not just the code. Lofi had three songs in the catalog, while most genres had only one, so a lofi fan got a full list of lofi and a metal or folk fan got one real match and then leftovers. Exact label matching made it worse, since "indie pop" got no credit for a pop fan. The system also never admits when it doesn't know something. An empty profile still got a confident "top 5." In a real app with millions of users, these same problems could keep pushing popular genres and the same few songs while people with less common tastes get worse recommendations without realizing it.
 
 

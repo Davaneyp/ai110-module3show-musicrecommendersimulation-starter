@@ -2,73 +2,90 @@
 
 ## 1. Model Name  
 
-Give your model a short, descriptive name.  
-Example: **VibeFinder 1.0**  
+**TuneJudge 1.0**
+
+It works like a judge at a contest. Every song gets points for how well it fits you, and the highest scores win.
 
 ---
 
 ## 2. Intended Use  
 
-Describe what your recommender is designed to do and who it is for. 
+**Goal / task:** TuneJudge suggests the top 5 songs from a small catalog that best fit one listener's taste. It does not predict ratings or learn from plays. It only compares song features to what the user says they like.
 
-Prompts:  
+**What it assumes about the user:**
 
-- What kind of recommendations does it generate  
-- What assumptions does it make about the user  
-- Is this for real users or classroom exploration  
+- They can name one favorite genre and one favorite mood.
+- They can describe the sound they want with numbers from 0 to 1: energy, positivity (valence), and how acoustic it is.
+- Their taste stays the same for the whole session.
+
+**Intended use:**
+
+- Classroom learning about how recommenders turn data into rankings.
+- Testing how scoring weights create bias.
+- Showing the reasons behind each pick, so the logic is easy to inspect.
+
+**Not intended for:**
+
+- Real users or a real music app. The catalog is 20 made-up songs.
+- Judging what music is "good." A high score only means "close to what you typed."
+- Any decision with real stakes, like paying artists or deciding which songs get promoted.
+- Users who don't know their own preferences. An empty or unknown profile still gets a confident-looking list, which is misleading.
 
 ---
 
 ## 3. How the Model Works  
 
-Explain your scoring approach in simple language.  
+TuneJudge looks at five things about each song and gives it points:
 
-Prompts:  
+- **Genre match: 2 points.** The song's genre is exactly your favorite genre.
+- **Mood match: 1 point.** The song's mood is exactly your favorite mood.
+- **Energy: up to 1.5 points.** The closer the song's energy is to what you asked for, the more points. A perfect match gets all 1.5.
+- **Acousticness: up to 1 point.** Same idea. Closer to your target means more points.
+- **Valence (how happy it sounds): up to 0.5 points.** Same idea again.
 
-- What features of each song are used (genre, energy, mood, etc.)  
-- What user preferences are considered  
-- How does the model turn those into a score  
-- What changes did you make from the starter logic  
+The best possible score is 6 points. TuneJudge scores every song, sorts them from highest to lowest, and shows the top 5. Each pick comes with a list of reasons, like "genre match: pop (+2.00)."
 
-Avoid code here. Pretend you are explaining the idea to a friend who does not program.
+Genre is worth the most because it reflects long-term taste. Mood changes with the moment, so it is worth less. Energy counts by *closeness*, not by size, so someone who wants calm music doesn't get handed the loudest song.
+
+**Changes from the starter logic:**
+
+- Built the scoring and ranking from scratch (the starter only returned the first 5 songs).
+- Added valence and a numeric acousticness target to the profile.
+- Made label matching ignore capital letters and extra spaces, so "  POP " still matches "pop."
+- Show every point a song earned, so each recommendation explains itself.
+- Added a switch to test a different set of weights (see Section 7).
 
 ---
 
 ## 4. Data  
 
-Describe the dataset the model uses.  
+- **Size:** 20 songs in `data/songs.csv`. The starter had 10. I added 10 more to cover more genres and moods.
+- **Features per song:** title, artist, genre, mood, energy, tempo, valence, danceability, and acousticness. The numbers run from 0 to 1, except tempo, which is in beats per minute.
+- **Features used in scoring:** genre, mood, energy, valence, and acousticness. Tempo and danceability are left out because they mostly rise and fall with energy.
+- **Genres:** 17. Lofi has 3 songs, pop has 2, and the other 15 genres (rock, jazz, metal, classical, folk, and more) have 1 song each.
+- **Moods:** 16. Chill has 3 songs, happy and intense have 2 each, and the rest have 1.
 
-Prompts:  
+**Limits:**
 
-- How many songs are in the catalog  
-- What genres or moods are represented  
-- Did you add or remove data  
-- Are there parts of musical taste missing in the dataset  
+- The songs and numbers are made up. They were not measured from real audio.
+- Most genres have only one song, so many users get one real match and then leftovers.
+- There are no lyrics, language, release year, artist popularity, or listening history.
+- Each song has exactly one genre and one mood. Real songs often fit several.
+- Genre and mood labels mostly reflect Western popular music.
 
 ---
 
 ## 5. Strengths  
 
-Where does your system seem to work well  
-
-Prompts:  
-
-- User types for which it gives reasonable results  
-- Any patterns you think your scoring captures correctly  
-- Cases where the recommendations matched your intuition  
+- **Clear, typical tastes work well.** Happy Pop, Chill Lofi, and Deep Intense Rock each got a near-perfect #1 (5.87 to 5.94 out of 6), and the rest of each list sounded like the same vibe.
+- **Energy really controls the feel.** Chill Lofi and Deep Intense Rock shared zero songs. The quiet profile got quiet songs, and the loud one got loud songs.
+- **Messy typing doesn't break it.** "  POP " and "Happy" gave the exact same list as "pop" and "happy."
+- **Every pick explains itself.** You can see exactly where each point came from, which made the biases easy to find.
+- **It is easy to tune.** All the weights live in one place, so you can change them without touching the ranking code.
 
 ---
 
 ## 6. Limitations and Bias 
-
-Where the system struggles or behaves unfairly. 
-
-Prompts:  
-
-- Features it does not consider  
-- Genres or moods that are underrepresented  
-- Cases where the system overfits to one preference  
-- Ways the scoring might unintentionally favor some users
 
 **Main weakness: genre imbalance creates a filter bubble for some users and a near-random list for others.** The catalog has 17 genres, but lofi has 3 songs and pop has 2, while the other 15 genres have exactly one song each. Because a genre match is worth +2.0 (a third of the maximum score), a lofi fan can fill three of their five recommendations with genre matches, and the Chill Lofi results stay tightly inside that one sound. A classical, folk, or metal fan gets one genre match at most, and the other four slots are filled by whichever songs happen to have a similar energy, so the same high-energy tracks (Gym Hero, Concrete Crown, Storm Runner) keep showing up for very different users. In practice, the system serves users with well-represented tastes well and gives everyone else one real match followed by leftovers.
 
@@ -83,16 +100,13 @@ Prompts:
 
 ## 7. Evaluation  
 
-How you checked whether the recommender behaved as expected. 
+**How I tested it, in short:**
 
-Prompts:  
-
-- Which user profiles you tested  
-- What you looked for in the recommendations  
-- What surprised you  
-- Any simple tests or comparisons you ran  
-
-No need for numeric metrics unless you created some.
+- Ran 10 user profiles through `python -m src.main`: 3 typical listeners and 7 tricky ones.
+- Read each top 5 and asked, "Would this person actually want these songs?"
+- Compared pairs of profiles that differ in one or two settings to see what each setting really does.
+- Ran one weight experiment (energy doubled, genre halved) and compared it to the baseline.
+- No accuracy metrics. The checks were by reading the results and the reasons.
 
 ### Profiles Tested
 
@@ -692,14 +706,11 @@ The experiment shows the rankings are very sensitive to the weights. It doesn't 
 
 ## 8. Future Work  
 
-Ideas for how you would improve the model next.  
+1. **Give partial credit for similar labels.** "indie pop" should earn some points for a pop fan, and "relaxed" or "focused" should earn some for a chill fan. A simple table of related genres and moods would do it.
+2. **Add guardrails.** Keep targets between 0 and 1. Warn the user when their genre or mood isn't in the catalog. Ask for preferences instead of returning a list when the profile is empty.
+3. **Add variety to the top 5.** Limit how many songs from one genre can appear, and lower the score of songs that already show up everywhere (like Gym Hero), so users see more of the catalog.
 
-Prompts:  
-
-- Additional features or preferences  
-- Better ways to explain recommendations  
-- Improving diversity among the top results  
-- Handling more complex user tastes  
+A bigger, more balanced catalog would also help, so every genre has more than one song.
 
 ---
 
@@ -707,8 +718,9 @@ Prompts:
 
 A few sentences about your experience.  
 
-Prompts:  
+What I learned about recommender systems: A recommender is really a set of choices about what matters. Picking how many points genre is worth compared to energy decides what every user sees. Small weight changes can reshuffle the whole list.
 
-- What you learned about recommender systems  
-- Something unexpected or interesting you discovered  
-- How this changed the way you think about music recommendation apps  
+Something unexpected: I was surprised how often a song's label beat how it actually sounds. The Sad but Hyped listener asked for loud, high-energy music and got a quiet acoustic folk song at #1, just because it was tagged "folk" and "sad." I was also surprised that Gym Hero showed up in 7 of my 10 test lists. One song that sits close to "energetic" can take over the results for a lot of different people.
+
+How this changed how I think about music apps: When an app like Spotify recommends something, I now wonder what it's weighing and who it might be leaving out (Especially with their AI playlist creation feature, sometimes some of the songs in the playlist don't match my description). If my 20-song system already has a filter bubble, a real app could too. I'd want recommendations that explain themselves, mix in some variety, and say "I'm not sure" when they don't have enough information about me.
+
